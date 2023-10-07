@@ -1,0 +1,15 @@
+/// @ 0.12.4
+### {
+  name: "Note Object Checker"
+  version: "0.1.0"
+  author: "@into_vision@misskey.io"
+  description: "NoteObjectをの中身を表示する"
+  permissions: []
+  config: {}
+}
+
+Plugin:register_note_view_interruptor(@(note){
+	note.text = `{Json:stringify(note)}{Str:lf}{note.text}`
+	note
+})
+
