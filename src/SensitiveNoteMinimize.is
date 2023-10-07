@@ -1,0 +1,38 @@
+/// @ 0.12.4
+### {
+  name: "Sensitive Note Minimize"
+  version: "0.1.0"
+  author: "@into_vision@misskey.io"
+  description: "Sensitive画像が添付されてるNoteを最小化します"
+  permissions: []
+  config: {}
+}
+
+@checkSensitive(files) {
+	if files == null {
+		return false
+	}
+
+	each (let file, files) {
+		if file.isSensitive {
+			return true
+		}
+	}
+	false
+}
+
+Plugin:register_note_view_interruptor(@(note){
+	if note.renote != null {
+		if checkSensitive(note.renote.files) {
+			note.renote.cw = "<small>[sensitive]</small>"
+			note.renote.reactions = []
+			note.renote.reactionEmojis = []
+		}
+	} else if checkSensitive(note.files) {
+		note.cw = "<small>[sensitive]</small>"
+		// {}ではなく[]にすることでリアクションの動的追加を無視できる
+		note.reactions = []
+		note.reactionEmojis = []
+	}
+	note
+})
