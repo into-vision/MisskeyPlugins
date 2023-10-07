@@ -1,0 +1,59 @@
+/// @ 0.12.4
+### {
+  name: "Smart Feed Note"
+  version: "0.1.0"
+  author: "@into_vision@misskey.io"
+  description: "RSS Feed Botのノートをサムネイルのみにする"
+  permissions: []
+  config: {
+    show_title: {
+      type: 'boolean'
+      label: 'タイトルを表示する'
+      description: 'サムネイルだと途中で切れる事が多いので気になる人は有効にしよう！'
+      default: false
+    }
+    show_url: {
+      type: 'boolean'
+      label: 'URLを表示する'
+      description: 'URLが邪魔なら消せるが不審なURLに気づきにくいので注意！'
+      default: true
+    }
+    target_host: {
+      type: 'string'
+      label: 'Feed Botとみなすホスト'
+      description: '対象のホストからのアカウントは全てFeedBotとしてみなすよ！'
+      default: 'rss-mstdn.studiofreesia.com'
+    }
+  }
+}
+
+@maskText(note) {
+	if note.user.host == Plugin:config.target_host {
+		if Plugin:config.show_url || Plugin:config.show_title {
+			let lines = note.text.split(Str:lf)
+			if lines.len >= 2 {
+				if Plugin:config.show_url && Plugin:config.show_title {
+					note.text = `{lines[0]}{Str:lf}{lines[1]}`
+				} else if Plugin:config.show_url {
+					note.text = lines[1]
+				} else {
+					note.text = lines[0]
+				}
+			} else {
+				note.text = ""
+			}
+		} else {
+			note.text = ""
+		}
+	}
+}
+
+Plugin:register_note_view_interruptor(@(note){
+	if note.renote != null {
+		maskText(note.renote)
+	} else {
+		maskText(note)
+	}
+	note
+})
+
